@@ -1,5 +1,6 @@
 import pygame
 import math
+from rainbow import Rainbow
 
 class Player:
     def __init__(self, screen_width, screen_height, image_path, scale_factor):
@@ -9,7 +10,8 @@ class Player:
         self.screen_height = screen_height
         self.speed = .3
         self.angle = 0 # Rotation angle
-
+        self.rainbow = Rainbow(self.x, self.y)
+        self.scale_factor = scale_factor
         # Load and scale player image
         self.original_image = pygame.image.load(image_path)
         self.width, self.height = self.original_image.get_size()
@@ -19,6 +21,36 @@ class Player:
         self.rect = self.image.get_rect(center=(self.x, self.y))
 
 
+    def handle_rainbow(self, joystick):
+        # Get the value of the right trigger
+        trigger_value = joystick.get_axis(5)  # Adjust the axis number as needed
+
+        # Normalize the trigger value
+        normalized_trigger_value = max(0, trigger_value)
+
+        # Calculate the top center point of the player at its current scale
+        # We use the scaled height to determine the position
+        top_center_x = 0  # The top center x relative to the player's center is 0 because it's in the middle
+        top_center_y = -self.height * self.scale_factor / 2  # Negative because we're going up from the center
+
+        # Rotate this point around the player's center by the player's current rotation angle
+        angle_radians = math.radians(self.angle)
+        rotated_top_center_x = top_center_x * math.cos(angle_radians) - top_center_y * math.sin(angle_radians)
+        rotated_top_center_y = top_center_x * math.sin(angle_radians) + top_center_y * math.cos(angle_radians)
+
+        # Update the starting position of the rainbow
+        self.rainbow.start_x = self.x + rotated_top_center_x
+        self.rainbow.start_y = self.y + rotated_top_center_y
+
+        # Update rainbow based on trigger value
+        if normalized_trigger_value > 0.1:  # Adjust threshold as needed
+            self.rainbow.update(True)
+        else:
+            self.rainbow.update(False)
+
+
+
+            
     def handle_movement(self, joystick):
         axes = joystick.get_numaxes()
         if axes >= 2:
@@ -57,3 +89,6 @@ class Player:
         self.image = pygame.transform.rotate(self.original_image, -self.angle)
         self.rect = self.image.get_rect(center=(self.x, self.y))
         screen.blit(self.image, self.rect.topleft)
+        
+        # Draw the rainbow with the player's angle
+        self.rainbow.draw(screen, self.angle)

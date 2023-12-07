@@ -35,6 +35,7 @@ while running:
     # Handle player movement
     if joystick:
         player.handle_movement(joystick)
+        player.handle_rainbow(joystick)
 
     # Collision detection for collectibles
     for collectible in collectibles:

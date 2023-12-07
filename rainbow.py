@@ -1,26 +1,57 @@
 import pygame
+import random
 import math
+
 class Rainbow:
-    def __init__(self, start_x, start_y):
+    def __init__(self, start_x, start_y, num_bands=200, speed=0.3):
         self.start_x = start_x
         self.start_y = start_y
-        self.length = 0
-        self.max_length = 1000
-        self.width = 25
-        self.color = (155, 120, 0)  # Starting color, can be changed to a rainbow gradient
-        print('po')
+        self.max_band_height = 15  # Maximum height of each color band
+        self.num_bands = num_bands
+        self.colors = [(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))]  # Start with one random color
+        self.current_band_height = 0
+        self.growth_phase = 0  # Track the phase of the growth/shrinkage
+        self.speed = speed  # Speed of the growth and shrinkage
+
+    def generate_random_color(self):
+        # Generates a color variation based on the last color or a new random color if no colors are present
+        if self.colors:
+            last_color = self.colors[-1]
+            color_variation = 40  # The maximum change in each RGB component
+            new_color = tuple(max(0, min(255, c + random.randint(-color_variation, color_variation))) for c in last_color)
+        else:
+            # If there are no colors, generate a completely new random color
+            new_color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+        
+        return new_color
 
     def update(self, grow):
-        if grow and self.length < self.max_length:
-            self.length += 1.5  # Increase the length of the rainbow
+        self.growth_phase += self.speed
+        self.current_band_height = self.max_band_height * (math.sin(self.growth_phase) * 0.5 + 0.5)
+
+        if grow:
+            if self.growth_phase >= math.pi:
+                self.growth_phase = 0
+                if len(self.colors) < self.num_bands:
+                    self.colors.append(self.generate_random_color())
         else:
-            self.length = max(0, self.length - 1)  # Decrease the length
+            if self.growth_phase >= math.pi:
+                if len(self.colors) > 0:
+                    self.colors.pop()
+                self.growth_phase = 0
 
     def draw(self, screen, angle):
-            # Calculate the end point of the rainbow
-            angle_radians = math.radians(angle)
-            end_x = self.start_x + math.sin(angle_radians) * self.length
-            end_y = self.start_y - math.cos(angle_radians) * self.length  # Pygame's y-coordinates increase downwards
+        angle_radians = math.radians(angle)
+        
+        for i, color in enumerate(self.colors):
+            band_height = i * self.max_band_height
+            if i == len(self.colors) - 1:
+                band_height += self.current_band_height
 
-            # Draw the rainbow
-            pygame.draw.line(screen, self.color, (self.start_x, self.start_y), (end_x, end_y), self.width)
+            start_x = self.start_x + math.sin(angle_radians) * band_height
+            start_y = self.start_y - math.cos(angle_radians) * band_height
+            
+            end_x = self.start_x + math.sin(angle_radians) * (band_height + self.max_band_height)
+            end_y = self.start_y - math.cos(angle_radians) * (band_height + self.max_band_height)
+            
+            pygame.draw.line(screen, color, (start_x, start_y), (end_x, end_y), self.max_band_height)

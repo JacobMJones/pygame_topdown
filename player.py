@@ -18,6 +18,7 @@ class Player:
         self.image = self.original_image
         self.rect = self.image.get_rect(center=(self.x, self.y))
 
+
     def handle_movement(self, joystick):
         axes = joystick.get_numaxes()
         if axes >= 2:
@@ -32,8 +33,10 @@ class Player:
             right_stick_y = joystick.get_axis(3)
             threshold = 0.1
             if abs(right_stick_x) > threshold or abs(right_stick_y) > threshold:
+
                 # Calculate the angle, adjusting it by 270 degrees to align with the image orientation
                 self.angle = (math.degrees(math.atan2(-right_stick_y, right_stick_x)) + 270) % 360
+                
             else:
                 # If within the dead zone, don't change the angle
                 return
@@ -43,19 +46,6 @@ class Player:
         self.image = pygame.transform.rotate(self.original_image, -self.angle)
         self.rect = self.image.get_rect(center=(self.x, self.y))
         screen.blit(self.image, self.rect.topleft)
-
-    def draw(self, screen):
-        # Rotate the player image around its center
-        self.image = pygame.transform.rotate(self.original_image, -self.angle)
-        self.rect = self.image.get_rect(center=(self.x, self.y))
-        screen.blit(self.image, self.rect.topleft)
-
-    def draw(self, screen):
-        # Rotate the player image around its center
-        self.image = pygame.transform.rotate(self.original_image, -self.angle)
-        self.rect = self.image.get_rect(center=(self.x, self.y))
-        screen.blit(self.image, self.rect.topleft)
-
 
     def check_boundaries(self):
         if self.x < 0:

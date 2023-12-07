@@ -20,7 +20,7 @@ else:
     print("No joystick detected!")
 
 # Create a player instance
-player = Player(screen_width, screen_height, 'assets\player\player.png', 0.1)  # Scale to 50%
+player = Player(screen_width, screen_height, 'assets\player\player.png', 0.1)  
 
 
 # Game loop

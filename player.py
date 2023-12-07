@@ -40,13 +40,8 @@ class Player:
             else:
                 # If within the dead zone, don't change the angle
                 return
-
-    def draw(self, screen):
-        # Rotate the player image around its center
-        self.image = pygame.transform.rotate(self.original_image, -self.angle)
-        self.rect = self.image.get_rect(center=(self.x, self.y))
-        screen.blit(self.image, self.rect.topleft)
-
+            
+    #checks for screen edge
     def check_boundaries(self):
         if self.x < 0:
             self.x = 0

@@ -1,6 +1,6 @@
 import pygame
 from player import Player
-
+from collectible import Collectible
 # Initialize Pygame
 pygame.init()
 
@@ -22,7 +22,9 @@ else:
 # Create a player instance
 player = Player(screen_width, screen_height, 'assets\player\player.png', 0.1)  
 
-
+collectibles = [Collectible(100, 450, 'assets\collectibles\jewel.png'), 
+                Collectible(100, 250, 'assets\collectibles\jewel.png')
+               ]
 # Game loop
 running = True
 while running:
@@ -31,13 +33,22 @@ while running:
             running = False
 
     # Handle player movement
-    player.handle_movement(joystick)
+    if joystick:
+        player.handle_movement(joystick)
+
+    # Collision detection for collectibles
+    for collectible in collectibles:
+        if player.rect.colliderect(collectible.rect):
+            collectible.collected = True
+            # Add score increment or other effects here
 
     # Drawing
-    screen.fill((0, 0, 0))  # Clear screen
+    screen.fill((0, 128, 255))  # Clear the screen
     player.draw(screen)
+    for collectible in collectibles:
+        collectible.draw(screen)
 
-    # Update the game window
+    # Update the display
     pygame.display.update()
 
 # Quit Pygame

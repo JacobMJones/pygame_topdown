@@ -8,7 +8,7 @@ class Player:
         self.y = screen_height // 2
         self.screen_width = screen_width
         self.screen_height = screen_height
-        self.speed = .3
+        self.speed = 5
         self.angle = 0 # Rotation angle
         self.rainbow = Rainbow(self.x, self.y)
         self.scale_factor = scale_factor
@@ -21,7 +21,8 @@ class Player:
         self.rect = self.image.get_rect(center=(self.x, self.y))
 
 
-    def handle_rainbow(self, joystick):
+    def handle_rainbow(self, joystick, time_delta):
+
         # Get the value of the right trigger
         trigger_value = joystick.get_axis(5)  # Adjust the axis number as needed
 
@@ -44,9 +45,9 @@ class Player:
 
         # Update rainbow based on trigger value
         if normalized_trigger_value > 0.1:  # Adjust threshold as needed
-            self.rainbow.update(True)
+            self.rainbow.update(True, time_delta)
         else:
-            self.rainbow.update(False)
+            self.rainbow.update(False, time_delta)
 
 
 

@@ -6,15 +6,15 @@ import pygame_gui
 from pygame_gui.elements.ui_label import UILabel
 from player import Player
 from collectible import Collectible
-
+from UIControl import UIControl
 
 ##############
 # Initialize #
 ##############
 
 #Constants
-screen_width = 1000
-screen_height = 1000
+screen_width = 800
+screen_height = 800
 
 #Pygame
 pygame.init()
@@ -42,14 +42,23 @@ collectibles = [Collectible(100, 450, 'assets\collectibles\jewel.png'),
 
 #Pygame_GUI
 manager = pygame_gui.UIManager((screen_width, screen_height))
+# Initialize UI Controls
+player_speed_ui = UIControl(50, 100, 120, 50, "PSpeed:", manager, player.speed)
+rainbow_speed_ui = UIControl(250, 100, 120, 50, "RSpeed:", manager, player.rainbow.speed)
 
 
-#Player Speed
-player_speed_entry = pygame_gui.elements.ui_text_entry_line.UITextEntryLine(relative_rect=pygame.Rect((50, 50), (200, 50)), manager=manager)
-player_speed_entry.set_text(str(player.speed))
-player_speed_label = UILabel(relative_rect=pygame.Rect((50, 20), (200, 30)),
-                             text="Player Speed:",
-                             manager=manager)
+# #Player Speed
+# player_speed_entry = pygame_gui.elements.ui_text_entry_line.UITextEntryLine(relative_rect=pygame.Rect((50, 50), (120, 50)), manager=manager)
+# player_speed_entry.set_text(str(player.speed))
+# player_speed_label = UILabel(relative_rect=pygame.Rect((10, 20), (200, 100)),
+#                              text="PSpeed:",
+#                              manager=manager)
+
+# rainbow_speed_entry = pygame_gui.elements.ui_text_entry_line.UITextEntryLine(relative_rect=pygame.Rect((250, 50), (120, 50)), manager=manager)
+# rainbow_speed_entry.set_text(str(player.rainbow.speed))
+# rainbow_speed_label = UILabel(relative_rect=pygame.Rect((10, 20), (200, 100)),
+#                              text="RSpeed:",
+#                              manager=manager)
 
 #############
 # Game loop #
@@ -57,33 +66,30 @@ player_speed_label = UILabel(relative_rect=pygame.Rect((50, 20), (200, 30)),
 
 running = True
 while running:
-   
     time_delta = clock.tick(60)/1000.0
-    for event in pygame.event.get():
 
-    ##Quit program
+    for event in pygame.event.get():
+        # Handle quitting the game
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 running = False
 
-    # Pass the event to the UIManager
+        # Pass the event to the UIManager and UIControl objects
         manager.process_events(event)
-        if event.type == pygame.USEREVENT:
-            if event.user_type == pygame_gui.UI_TEXT_ENTRY_FINISHED:
-                if event.ui_element == player_speed_entry:
-                    try:
-                        player.speed = float(player_speed_entry.get_text())
-                    except ValueError:
-                        pass  # Handle invalid input   
+        player_speed_ui.update(event)
+        rainbow_speed_ui.update(event)
 
+    # Apply new values from the UI Controls to the player and rainbow
+    player.speed = player_speed_ui.value
+    player.rainbow.speed = rainbow_speed_ui.value
 
     # Update the UIManager
     manager.update(time_delta)
 
     # Handle player movement
-    if joystick:
+    if joystick_count > 0:
         player.handle_movement(joystick)
         player.handle_rainbow(joystick, time_delta)
 
@@ -95,13 +101,13 @@ while running:
 
     # Drawing
     screen.fill((200, 200, 250))  # Clear the screen
-    player.draw(screen) # Draw Player
+    player.draw(screen)           # Draw Player
     for collectible in collectibles:
-        collectible.draw(screen) #Draw Collectibles
+        if not collectible.collected:
+            collectible.draw(screen)  # Draw Collectibles
 
-    manager.draw_ui(screen)
-    # Update the display
-    pygame.display.update()
+    manager.draw_ui(screen)        # Draw UI
+    pygame.display.update()        # Update the display
 
 # Quit Pygame
 pygame.quit()
